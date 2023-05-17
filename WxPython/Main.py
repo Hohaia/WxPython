@@ -7,11 +7,11 @@ import Includes.Secrets as secrets
 
 # generate a random 32 character string
 def generateSessionID():
-    SESSID = ""
+    sessid = ""
     for i in range(32):
         tval = format(random.randint(0, 15), 'x')
-        SESSID += tval.upper()
-    return SESSID
+        sessid += tval.upper()
+    return sessid
 
 # run a query against the API using the given login parameters
 def runLoginQuery(url, queryParams, sessid):
@@ -76,7 +76,8 @@ def runQuery(url, queryParams, sessid):
 
     #* TESTING AREA
     print("Response: " + response) #TODO remove this line when done testing
-    #* END TESTING AREA
+    print("Sequence: " + str(SEQUENCE) + "\n") #TODO remove this line when done testing
+#* END TESTING AREA
 
     return response
 
@@ -91,11 +92,17 @@ def main():
     print("Session ID: " + sessionID) #TODO remove this line when done testing
     print("Username: " + secrets.username) #TODO remove this line when done testing
     print("Password: " + secrets.password) #TODO remove this line when done testing
-    print("Sequence: " + str(SEQUENCE)) #TODO remove this line when done testing
+    print("Sequence: " + str(SEQUENCE) + "\n") #TODO remove this line when done testing
 
     runQuery(url, params.userList, sessionID) #TODO remove this line when done testing
 
-    print("Sequence: " + str(SEQUENCE)) #TODO remove this line when done testing
+    runQuery(url, params.areaList, sessionID) #TODO remove this line when done testing
+
+    runQuery(url, params.doorList, sessionID) #TODO remove this line when done testing
+
+    runQuery(url, params.inputList, sessionID) #TODO remove this line when done testing
+
+    runQuery(url, params.outputList, sessionID) #TODO remove this line when done testing
     #* END TESTING AREA
 
 SEQUENCE = 0
