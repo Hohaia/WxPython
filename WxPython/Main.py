@@ -95,6 +95,10 @@ def main():
     print("Sequence: " + str(SEQUENCE) + "\n") #TODO remove this line when done testing
 
     runQuery(url, params.userList, sessionID) #TODO remove this line when done testing
+    print("Sequence: " + str(SEQUENCE)) #TODO remove this line when done testing
+
+    runQuery(url, params.areaList, sessionID) #TODO remove this line when done testing
+    print("Sequence: " + str(SEQUENCE)) #TODO remove this line when done testing
 
     runQuery(url, params.areaList, sessionID) #TODO remove this line when done testing
 
