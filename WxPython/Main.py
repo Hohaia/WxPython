@@ -1,10 +1,9 @@
-from hashlib import sha1
-import random
-import urllib.request
+from hashlib import sha1  # for hashing the password
+import random  # for generating a random session ID
+import urllib.request  # for making HTTP requests
 
-import Includes.Secrets as secrets
 import Includes.Params as params
-
+import Includes.Secrets as secrets
 
 # generate a random 32 character string
 def generateSessionID():
@@ -26,14 +25,12 @@ def runLoginQuery(url, queryParams, sessid):
 def xorFn(pswd: str, num: int):
     numbin = format(num, '032b') # convert number to binary string
     startpos = len(numbin) # start at end of the string (right hand side)
-
     retval = ""
+
     for i in range(len(pswd)):
         charcode = ord(pswd[i])  # take character at position i
-
         startpos = len(numbin) - 8 if startpos == 0 else startpos - 8  # grab 8 bits (if at lhs of string, start again at rhs)
         comp = int(numbin[startpos:startpos + 8], 2)  # convert 8 bits to decimal
-
         hexcode = format(charcode ^ comp, 'x')  # xor character and 8 bits
         if len(hexcode) == 1:
             hexcode = "0" + hexcode # add leading zero if necessary
