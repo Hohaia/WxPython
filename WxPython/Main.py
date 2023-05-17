@@ -94,7 +94,18 @@ def main():
     print("Sequence: " + str(SEQUENCE)) #TODO remove this line when done testing
 
     runQuery(url, params.userList, sessionID) #TODO remove this line when done testing
+    print("Sequence: " + str(SEQUENCE)) #TODO remove this line when done testing
 
+    runQuery(url, params.areaList, sessionID) #TODO remove this line when done testing
+    print("Sequence: " + str(SEQUENCE)) #TODO remove this line when done testing
+
+    runQuery(url, params.doorList, sessionID) #TODO remove this line when done testing
+    print("Sequence: " + str(SEQUENCE)) #TODO remove this line when done testing
+
+    runQuery(url, params.inputList, sessionID) #TODO remove this line when done testing
+    print("Sequence: " + str(SEQUENCE)) #TODO remove this line when done testing
+
+    runQuery(url, params.outputList, sessionID) #TODO remove this line when done testing
     print("Sequence: " + str(SEQUENCE)) #TODO remove this line when done testing
     #* END TESTING AREA
 
