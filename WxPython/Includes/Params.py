@@ -1,6 +1,6 @@
 # login parameters
 init = "Command&Type=Session&SubType=InitSession"
-login = "Command&Type=Session&SubType=CheckPassword"
+login = "Command&Type=Session&SubType=CheckPasswordServer"
 
 
 ## query parameters
