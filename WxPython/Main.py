@@ -127,7 +127,7 @@ def main():
 
     test = runQuery(url, sessionID, params.control, params.doors, 3, 1) #TODO remove this line when done testing
     print(f"Response: {test}") #TODO remove this line when done testing
-    print("Sequence: " + str(SEQUENCE) + "\n") #TODO remove this line when done testing
+    print(f"Sequence: {SEQUENCE}\n") #TODO remove this line when done testing
     #* END TESTING AREA
 
 
