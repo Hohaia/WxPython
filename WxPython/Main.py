@@ -73,6 +73,10 @@ def runQuery(url, sessid, queryType, subType, recID = None, command = None, data
 
     # TODO handle exceptions for invalid queries
 
+    #* TESTING AREA
+    print(f"Query: {url_params}") #TODO remove this line when done testing
+    #* END TESTING AREA
+
     if queryType == params.getList:
         return convertToDict(response)
 
@@ -85,6 +89,19 @@ def convertToDict(inputString):
         key, value = item.split("=")
         dictionary[int(key)] = value
     return dictionary
+
+def getRecID(list, rec):
+    # initialize the key to None
+    recID = None
+
+    # loop through the dictionary using enumerate to get both index and key
+    for index, key in enumerate(list.keys()):
+        if list[key] == rec:
+            recID = key
+            break
+
+    return recID
+
 
 #* main function
 def main():
@@ -104,23 +121,23 @@ def main():
     print("Username: " + secrets.username) #TODO remove this line when done testing
     print("Password: " + secrets.password + "\n") #TODO remove this line when done testing
     print("\nUsers:") #TODO remove this line when done testing
-    for i, j in userList.items(): #TODO remove this line when done testing
-        print(f"{i}. {j}") #TODO remove this line when done testing
+    for key, value in userList.items(): #TODO remove this line when done testing
+        print(f"{key}. {value}") #TODO remove this line when done testing
     print("\nAreas:") #TODO remove this line when done testing
-    for i, j in areaList.items(): #TODO remove this line when done testing
-        print(f"{i}. {j}") #TODO remove this line when done testing
+    for key, value in areaList.items(): #TODO remove this line when done testing
+        print(f"{key}. {value}") #TODO remove this line when done testing
     print("\nDoors:") #TODO remove this line when done testing
-    for i, j in doorList.items(): #TODO remove this line when done testing
-        print(f"{i}. {j}") #TODO remove this line when done testing
+    for key, value in doorList.items(): #TODO remove this line when done testing
+        print(f"{key}. {value}") #TODO remove this line when done testing
     print("\nInputs:") #TODO remove this line when done testing
-    for i, j in inputList.items(): #TODO remove this line when done testing
-        print(f"{i}. {j}") #TODO remove this line when done testing
+    for key, value in inputList.items(): #TODO remove this line when done testing
+        print(f"{key}. {value}") #TODO remove this line when done testing
     print("\nOutputs:") #TODO remove this line when done testing
-    for i, j in outputList.items(): #TODO remove this line when done testing
-        print(f"{i}. {j}") #TODO remove this line when done testing
+    for key, value in outputList.items(): #TODO remove this line when done testing
+        print(f"{key}. {value}") #TODO remove this line when done testing
     print("\nTrouble Inputs:") #TODO remove this line when done testing
-    for i, j in troubleInputList.items(): #TODO remove this line when done testing
-        print(f"{i}. {j}") #TODO remove this line when done testing
+    for key, value in troubleInputList.items(): #TODO remove this line when done testing
+        print(f"{key}. {value}") #TODO remove this line when done testing
     print("\n") #TODO remove this line when done testing
 
     test = runQuery(url, sessionID, params.control, params.doors, 3, 0) #TODO remove this line when done testing
