@@ -57,23 +57,21 @@ def runQuery(url, sessid, queryType, subType, recID = None, command = None, data
     global SEQUENCE
 
     queryParams = f"{sessid}{queryType}{subType}"
-    if recID:
+    if recID is not None:
         queryParams += f"&RecId={recID}"
-    if command:
+    if command is not None:
         queryParams += f"&Command={command}"
-    if data1:
+    if data1 is not None:
         queryParams += f"&Data1={data1}"
-    if data2:
+    if data2 is not None:
         queryParams += f"&Data2={data2}"
     queryParams += f"&Sequence={SEQUENCE}"
     url_params = url + queryParams
 
-    #* TESTING AREA
-    print("Query URL: " + url_params) #TODO remove this line when done testing
-    #* END TESTING AREA
-
     response = urllib.request.urlopen(url_params).read().decode('utf-8')
     SEQUENCE += 1 # increment sequence number
+
+    # TODO handle exceptions for invalid queries
 
     if queryType == params.getList:
         return convertToDict(response)
@@ -125,7 +123,7 @@ def main():
         print(f"{i}. {j}") #TODO remove this line when done testing
     print("\n") #TODO remove this line when done testing
 
-    test = runQuery(url, sessionID, params.control, params.doors, 3, 1) #TODO remove this line when done testing
+    test = runQuery(url, sessionID, params.control, params.doors, 3, 0) #TODO remove this line when done testing
     print(f"Response: {test}") #TODO remove this line when done testing
     print(f"Sequence: {SEQUENCE}\n") #TODO remove this line when done testing
     #* END TESTING AREA
