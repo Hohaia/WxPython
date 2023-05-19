@@ -44,10 +44,6 @@ def login(url, sessid):
 
     data = runLoginQuery(url, params.init, sessid) # initiate session
 
-    #* TESTING AREA
-    print("Initializadtion response: " + data) #TODO remove this line when done testing
-    #* END TESTING AREA
-
     xorUsername = xorFn(secrets.username, (int(data) +1))
     hashXorUsername = sha1(xorUsername.encode('utf-8')).hexdigest().upper()
     xorPswdHash = xorFn(pswdHash, int(data))
@@ -56,15 +52,20 @@ def login(url, sessid):
     loginParams = f"{params.login}&Name={hashXorUsername}&Password={hashXorPswdHash}" # build the login parameters
     data = runLoginQuery(url, loginParams, sessid) # login to session
 
-    #* TESTING AREA
-    print("Login response: " + data) #TODO remove this line when done testing
-    #* END TESTING AREA
-
 #*TODO run a query against the API using the given parameters and session ID
-def runQuery(url, queryParams, sessid):
+def runQuery(url, sessid, queryType, subType, recID = None, command = None, data1 = None, data2 = None):
     global SEQUENCE
 
-    queryParams = sessid + queryParams + f"&Sequence={SEQUENCE}"
+    queryParams = f"{sessid}{queryType}{subType}"
+    if recID:
+        queryParams += f"&RecId={recID}"
+    if command:
+        queryParams += f"&Command={command}"
+    if data1:
+        queryParams += f"&Data1={data1}"
+    if data2:
+        queryParams += f"&Data2={data2}"
+    queryParams += f"&Sequence={SEQUENCE}"
     url_params = url + queryParams
 
     #* TESTING AREA
@@ -74,40 +75,61 @@ def runQuery(url, queryParams, sessid):
     response = urllib.request.urlopen(url_params).read().decode('utf-8')
     SEQUENCE += 1 # increment sequence number
 
-    #* TESTING AREA
-    print("Response: " + response) #TODO remove this line when done testing
-    print("Sequence: " + str(SEQUENCE) + "\n") #TODO remove this line when done testing
-#* END TESTING AREA
+    if queryType == params.getList:
+        return convertToDict(response)
 
     return response
 
+def convertToDict(inputString):
+    dictionary = {}
+
+    for item in inputString.split("&"):
+        key, value = item.split("=")
+        dictionary[int(key)] = value
+    return dictionary
+
 #* main function
 def main():
-    url = f"https://{secrets.domain}//PRT_CTRL_DIN_ISAPI.dll?"
+    url = f"https://{secrets.domain}/PRT_CTRL_DIN_ISAPI.dll?"
     sessionID = generateSessionID()
 
     login(url, sessionID)
+    userList = runQuery(url, sessionID, params.getList, params.users)
+    areaList = runQuery(url, sessionID, params.getList, params.areas)
+    doorList = runQuery(url, sessionID, params.getList, params.doors)
+    inputList = runQuery(url, sessionID, params.getList, params.inputs)
+    outputList = runQuery(url, sessionID, params.getList, params.outputs)
+    troubleInputList = runQuery(url, sessionID, params.getList, params.troubleInputs)
 
     #* TESTING AREA
     print("Session ID: " + sessionID) #TODO remove this line when done testing
     print("Username: " + secrets.username) #TODO remove this line when done testing
-    print("Password: " + secrets.password) #TODO remove this line when done testing
+    print("Password: " + secrets.password + "\n") #TODO remove this line when done testing
+    print("\nUsers:") #TODO remove this line when done testing
+    for i, j in userList.items(): #TODO remove this line when done testing
+        print(f"{i}. {j}") #TODO remove this line when done testing
+    print("\nAreas:") #TODO remove this line when done testing
+    for i, j in areaList.items(): #TODO remove this line when done testing
+        print(f"{i}. {j}") #TODO remove this line when done testing
+    print("\nDoors:") #TODO remove this line when done testing
+    for i, j in doorList.items(): #TODO remove this line when done testing
+        print(f"{i}. {j}") #TODO remove this line when done testing
+    print("\nInputs:") #TODO remove this line when done testing
+    for i, j in inputList.items(): #TODO remove this line when done testing
+        print(f"{i}. {j}") #TODO remove this line when done testing
+    print("\nOutputs:") #TODO remove this line when done testing
+    for i, j in outputList.items(): #TODO remove this line when done testing
+        print(f"{i}. {j}") #TODO remove this line when done testing
+    print("\nTrouble Inputs:") #TODO remove this line when done testing
+    for i, j in troubleInputList.items(): #TODO remove this line when done testing
+        print(f"{i}. {j}") #TODO remove this line when done testing
+    print("\n") #TODO remove this line when done testing
+
+    test = runQuery(url, sessionID, params.control, params.doors, 3, 1) #TODO remove this line when done testing
+    print(f"Response: {test}") #TODO remove this line when done testing
     print("Sequence: " + str(SEQUENCE) + "\n") #TODO remove this line when done testing
-
-    runQuery(url, params.userList, sessionID) #TODO remove this line when done testing
-    print("Sequence: " + str(SEQUENCE)) #TODO remove this line when done testing
-
-    runQuery(url, params.areaList, sessionID) #TODO remove this line when done testing
-    print("Sequence: " + str(SEQUENCE)) #TODO remove this line when done testing
-
-    runQuery(url, params.areaList, sessionID) #TODO remove this line when done testing
-
-    runQuery(url, params.doorList, sessionID) #TODO remove this line when done testing
-
-    runQuery(url, params.inputList, sessionID) #TODO remove this line when done testing
-
-    runQuery(url, params.outputList, sessionID) #TODO remove this line when done testing
     #* END TESTING AREA
+
 
 SEQUENCE = 0
 
