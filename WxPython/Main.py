@@ -5,12 +5,16 @@ import urllib.request  # for making HTTP requests
 import Includes.Params as params
 import Includes.Secrets as secrets
 
-##TODO create classes for users, ,access levels, areas, doors, inputs, outputs, and trouble inputs
+# global variables
+SEQUENCE = 0
+
+# class for user objects
 class user:
     def __init__(self, name, recID):
         self.name = name
         self.recID = recID
 
+# class for input/output objects (areas, doors, inputs, outputs, and trouble inputs)
 class wxIO:
     def __init__(self, name, recID, statusKey):
         self.name = name
@@ -99,7 +103,7 @@ def runQuery(url, sessid, queryType, subType, recID = None, command = None, data
 
     return response
 
-#* convert a string of key-value pairs to a dictionary
+# convert a string of key-value pairs to a dictionary
 def convertToDict(inputString):
     dictionary = {}
 
@@ -108,7 +112,7 @@ def convertToDict(inputString):
         dictionary[int(key)] = value
     return dictionary
 
-#* TODO get the key to find the status of an object
+# get the key to find the status of an object
 def getStatusKey(dictionary, item, dictName):
     statusKey = ""
     for key, value in dictionary.items():
@@ -169,6 +173,5 @@ def main():
     #* END TESTING AREA
 
 
-SEQUENCE = 0
 if __name__ == '__main__':
     main()
