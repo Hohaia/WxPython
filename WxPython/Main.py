@@ -148,6 +148,10 @@ def main():
     troubleInputs = buildObjectList(troubleInputList, "TroubleInput")
 
     #* TESTING AREA
+    print("\nAreas: ") #TODO remove this line when done testing
+    for item in areas: #TODO remove this line when done testing
+        print(f"{item.recID}. {item.name}, {item.statusKey}") #TODO remove this line when done testing
+    print("\nDoors: ") #TODO remove this line when done testing
     for item in doors: #TODO remove this line when done testing
         print(f"{item.recID}. {item.name}, {item.statusKey}") #TODO remove this line when done testing
     print("Session ID: " + sessionID) #TODO remove this line when done testing
