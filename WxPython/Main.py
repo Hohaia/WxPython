@@ -11,7 +11,7 @@ class user:
         self.name = name
         self.recID = recID
 
-class systemIO:
+class wxIO:
     def __init__(self, name, recID, statusKey):
         self.name = name
         self.recID = recID
@@ -121,7 +121,7 @@ def buildObjectList(areaList, name):
     objectList = []
     for key, value in areaList.items():
         sKey = getStatusKey(areaList, value, name)
-        value = systemIO(value, key, sKey)
+        value = wxIO(value, key, sKey)
         objectList.append(value)
     return objectList
 
