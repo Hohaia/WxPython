@@ -154,7 +154,16 @@ def main():
     print("\nDoors: ") #TODO remove this line when done testing
     for item in doors: #TODO remove this line when done testing
         print(f"{item.recID}. {item.name}, {item.statusKey}") #TODO remove this line when done testing
-    print("Session ID: " + sessionID) #TODO remove this line when done testing
+    print("\nInputs: ") #TODO remove this line when done testing
+    for item in inputs: #TODO remove this line when done testing
+        print(f"{item.recID}. {item.name}, {item.statusKey}") #TODO remove this line when done testing
+    print("\nOutputs: ") #TODO remove this line when done testing
+    for item in outputs: #TODO remove this line when done testing
+        print(f"{item.recID}. {item.name}, {item.statusKey}") #TODO remove this line when done testing
+    print("\nTrouble Inputs: ") #TODO remove this line when done testing
+    for item in troubleInputs: #TODO remove this line when done testing
+        print(f"{item.recID}. {item.name}, {item.statusKey}") #TODO remove this line when done testing
+    print("\nSession ID: " + sessionID) #TODO remove this line when done testing
     print("Username: " + secrets.username) #TODO remove this line when done testing
     print("Password: " + secrets.password + "\n") #TODO remove this line when done testing
     #* END TESTING AREA
