@@ -2,12 +2,14 @@
 init = "Command&Type=Session&SubType=InitSession"
 login = "Command&Type=Session&SubType=CheckPasswordServer"
 
-## request type
+## query type
 getList = "Request&Type=List&SubType="
+getStatus = "Request&Type=Status&SubType="
 control = "Command&Type=Control&SubType="
 
-## request subtype
+## query subtype
 users = "GXT_USERS_TBL"
+accessLevels = "GXT_ACCESSLEVELS_TBL"
 areas = "GXT_AREAS_TBL"
 doors = "GXT_DOORS_TBL"
 inputs = "GXT_INPUTS_TBL"

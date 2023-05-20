@@ -5,6 +5,18 @@ import urllib.request  # for making HTTP requests
 import Includes.Params as params
 import Includes.Secrets as secrets
 
+##TODO create classes for users, ,access levels, areas, doors, inputs, outputs, and trouble inputs
+class user:
+    def __init__(self, name, recID):
+        self.name = name
+        self.recID = recID
+
+class systemIO:
+    def __init__(self, name, recID, statusKey):
+        self.name = name
+        self.recID = recID
+        self.statusKey = statusKey
+
 # generate a random 32 character string
 def generateSessionID():
     sessid = ""
@@ -39,7 +51,9 @@ def xorFn(pswd: str, num: int):
     return retval.upper()
 
 # login to the WX API and initiate a session encrypted over HTTPS
-def login(url, sessid):
+def login(url):
+    global SEQUENCE
+    sessid = generateSessionID()
     pswdHash = sha1(secrets.password.encode('utf-8')).hexdigest()
 
     data = runLoginQuery(url, params.init, sessid) # initiate session
@@ -51,6 +65,9 @@ def login(url, sessid):
     
     loginParams = f"{params.login}&Name={hashXorUsername}&Password={hashXorPswdHash}" # build the login parameters
     data = runLoginQuery(url, loginParams, sessid) # login to session
+    SEQUENCE = 0 # reset sequence number
+
+    return sessid
 
 #*TODO run a query against the API using the given parameters and session ID
 def runQuery(url, sessid, queryType, subType, recID = None, command = None, data1 = None, data2 = None):
@@ -91,64 +108,54 @@ def convertToDict(inputString):
         dictionary[int(key)] = value
     return dictionary
 
-#* get the record ID from a dictionary
-def getRecID(list, rec):
-    # initialize the key to None
-    recID = None
-
-    # loop through the dictionary using enumerate to get both index and key
-    for index, key in enumerate(list.keys()):
-        if list[key] == rec:
-            recID = key
+#* TODO get the key to find the status of an object
+def getStatusKey(dictionary, item, dictName):
+    statusKey = ""
+    for key, value in dictionary.items():
+        if value == item:
+            statusKey = dictName + str(key)
             break
+    return statusKey
 
-    return recID
+def buildObjectList(areaList, name):
+    objectList = []
+    for key, value in areaList.items():
+        sKey = getStatusKey(areaList, value, name)
+        value = systemIO(value, key, sKey)
+        objectList.append(value)
+    return objectList
 
 
 #* main function
 def main():
     url = f"https://{secrets.domain}/PRT_CTRL_DIN_ISAPI.dll?"
-    sessionID = generateSessionID()
 
-    login(url, sessionID)
+    # initiate session and get lists
+    sessionID = login(url)
     userList = runQuery(url, sessionID, params.getList, params.users)
+    accessLevelList = runQuery(url, sessionID, params.getList, params.accessLevels)
     areaList = runQuery(url, sessionID, params.getList, params.areas)
     doorList = runQuery(url, sessionID, params.getList, params.doors)
     inputList = runQuery(url, sessionID, params.getList, params.inputs)
     outputList = runQuery(url, sessionID, params.getList, params.outputs)
     troubleInputList = runQuery(url, sessionID, params.getList, params.troubleInputs)
 
+    # build objects from lists
+    areas = buildObjectList(areaList, "Area")
+    doors = buildObjectList(doorList, "Door")
+    inputs = buildObjectList(inputList, "Input")
+    outputs = buildObjectList(outputList, "Output")
+    troubleInputs = buildObjectList(troubleInputList, "TroubleInput")
+
     #* TESTING AREA
+    for item in doors: #TODO remove this line when done testing
+        print(f"{item.recID}. {item.name}, {item.statusKey}") #TODO remove this line when done testing
     print("Session ID: " + sessionID) #TODO remove this line when done testing
     print("Username: " + secrets.username) #TODO remove this line when done testing
     print("Password: " + secrets.password + "\n") #TODO remove this line when done testing
-    print("\nUsers:") #TODO remove this line when done testing
-    for key, value in userList.items(): #TODO remove this line when done testing
-        print(f"{key}. {value}") #TODO remove this line when done testing
-    print("\nAreas:") #TODO remove this line when done testing
-    for key, value in areaList.items(): #TODO remove this line when done testing
-        print(f"{key}. {value}") #TODO remove this line when done testing
-    print("\nDoors:") #TODO remove this line when done testing
-    for key, value in doorList.items(): #TODO remove this line when done testing
-        print(f"{key}. {value}") #TODO remove this line when done testing
-    print("\nInputs:") #TODO remove this line when done testing
-    for key, value in inputList.items(): #TODO remove this line when done testing
-        print(f"{key}. {value}") #TODO remove this line when done testing
-    print("\nOutputs:") #TODO remove this line when done testing
-    for key, value in outputList.items(): #TODO remove this line when done testing
-        print(f"{key}. {value}") #TODO remove this line when done testing
-    print("\nTrouble Inputs:") #TODO remove this line when done testing
-    for key, value in troubleInputList.items(): #TODO remove this line when done testing
-        print(f"{key}. {value}") #TODO remove this line when done testing
-    print("\n") #TODO remove this line when done testing
-
-    test = runQuery(url, sessionID, params.control, params.doors, getRecID(doorList, "Josiah"), 1) #TODO remove this line when done testing
-    print(f"Response: {test}") #TODO remove this line when done testing
-    print(f"Sequence: {SEQUENCE}\n") #TODO remove this line when done testing
     #* END TESTING AREA
 
 
 SEQUENCE = 0
-
 if __name__ == '__main__':
     main()
