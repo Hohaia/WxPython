@@ -9,17 +9,43 @@ import Includes.Secrets as secrets
 SEQUENCE = 0
 
 # class for user objects
-class user:
+class User:
     def __init__(self, name, recID):
         self.name = name
         self.recID = recID
 
 # class for input/output objects (areas, doors, inputs, outputs, and trouble inputs)
-class wxIO:
+class WxIO:
     def __init__(self, name, recID, statusKey):
         self.name = name
         self.recID = recID
         self.statusKey = statusKey
+
+# class for area objects (inherits from wxIO)
+class Area(WxIO):
+    def __init__(self, name, recID, statusKey):
+            super().__init__(name, recID, statusKey)
+
+# class for door objects (inherits from wxIO)
+class Door(WxIO):
+    def __init__(self, name, recID, statusKey):
+        super().__init__(name, recID, statusKey)
+
+# class for input objects (inherits from wxIO)
+class Input(WxIO):
+    def __init__(self, name, recID, statusKey):
+            super().__init__(name, recID, statusKey)
+
+# class for output objects (inherits from wxIO)
+class Output(WxIO):
+    def __init__(self, name, recID, statusKey):
+            super().__init__(name, recID, statusKey)
+
+# class for trouble input objects (inherits from wxIO)
+class TroubleInput(WxIO):
+    def __init__(self, name, recID, statusKey):
+            super().__init__(name, recID, statusKey)
+
 
 # generate a random 32 character string
 def generateSessionID():
@@ -121,11 +147,29 @@ def getStatusKey(dictionary, item, dictName):
             break
     return statusKey
 
-def buildObjectList(areaList, name):
-    objectList = []
-    for key, value in areaList.items():
-        sKey = getStatusKey(areaList, value, name)
-        value = wxIO(value, key, sKey)
+def buildObjectList(ioList, name):
+    switch = {
+        "Area": [],
+        "Door": [],
+        "Input": [],
+        "Output": [],
+        "TroubleInput": []
+    }
+    objectList = switch.get(name, [])
+    for key, value in ioList.items():
+        statusKey = getStatusKey(ioList, value, name)
+        if name == "Area":
+            value = Area(value, key, statusKey)
+        elif name == "Door":
+            value = Door(value, key, statusKey)
+        elif name == "Input":
+            value = Input(value, key, statusKey)
+        elif name == "Output":
+            value = Output(value, key, statusKey)
+        elif name == "TroubleInput":
+            value = TroubleInput(value, key, statusKey)
+        else:
+            raise ValueError("Invalid object type")
         objectList.append(value)
     return objectList
 
@@ -168,9 +212,13 @@ def main():
     for item in troubleInputs: #TODO remove this line when done testing
         print(f"{item.recID}. {item.name}, {item.statusKey}") #TODO remove this line when done testing
     print("\nUsername: " + secrets.username) #TODO remove this line when done testing
-    print("Password: " + secrets.password) #TODO remove this line when done testing
+    #print("Password: " + secrets.password) #TODO remove this line when done testing
     print("SessionID: " + sessionID) #TODO remove this line when done testing
     #* END TESTING AREA
+
+    ## OPEN DOOR
+    #runQuery(url, sessionID, params.control, params.doors, doors[3].recID, 1)
+    ## OPEN DOOOR
 
 
 if __name__ == '__main__':
