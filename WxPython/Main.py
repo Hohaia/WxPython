@@ -6,98 +6,53 @@ import Includes.Params as params
 import Includes.Secrets as secrets
 import Includes.StatusCodeMaps as codeMaps
 
-# global variables
+## GLOBAL VARIABLES ##
 SEQUENCE = 0
+STATUS_DICT = {}
 
-# class for user objects
-class User:
-    def __init__(self, name, recID):
-        self.name = name
-        self.recID = recID
-
+## CLASSES ##
 # class for input/output objects (areas, doors, inputs, outputs, and trouble inputs)
 class WxIO:
     def __init__(self, name, recID, sessid):
         self.name = name
         self.recID = recID
+        self.statusKey = None
         self.sessid = sessid
         self.url = f"https://{secrets.domain}/PRT_CTRL_DIN_ISAPI.dll?"
+    def status(self):
+        return STATUS_DICT[self.statusKey]
 
 # class for area objects (inherits from wxIO)
 class Area(WxIO):
     def __init__(self, name, recID, sessid):
-            super().__init__(name, recID, sessid)
-
-    def status(self):
-        global SEQUENCE
-        requestURL = f"{self.url}{self.sessid}Request&Type=Status&SubType=GXT_AREAS_TBL&StartId={self.recID}&EndId={self.recID}&Sequence={SEQUENCE}"
-        response = urllib.request.urlopen(requestURL).read().decode('utf-8')
-        SEQUENCE += 1
-        lst = [int(x) for x in response.split('=')[1].split(',')]
-        lst[0] = codeMaps.alarmStatus1.get(lst[0], lst[0])
-        lst[1] = codeMaps.alarmStatus2.get(lst[1], lst[1])
-        lst[2] = codeMaps.alarmStatus3.get(lst[2], lst[2])
-        return lst
+        super().__init__(name, recID, sessid)
+        self.statusKey = "Area" + str(self.recID)
 
 # class for door objects (inherits from wxIO)
 class Door(WxIO):
     def __init__(self, name, recID, sessid):
         super().__init__(name, recID, sessid)
-    def status(self):
-        global SEQUENCE
-        requestURL = f"{self.url}{self.sessid}Request&Type=Status&SubType=GXT_DOORS_TBL&StartId={self.recID}&EndId={self.recID}&Sequence={SEQUENCE}"
-        response = urllib.request.urlopen(requestURL).read().decode('utf-8')
-        SEQUENCE += 1
-        lst = [int(x) for x in response.split('=')[1].split(',')]
-        lst[0] = codeMaps.doorStatus1.get(lst[0], lst[0])
-        lst[1] = codeMaps.doorStatus2.get(lst[1], lst[1])
-        return lst
+        self.statusKey = "Door" + str(self.recID)
 
 # class for input objects (inherits from wxIO)
 class Input(WxIO):
     def __init__(self, name, recID, sessid):
-            super().__init__(name, recID, sessid)
-    def status(self):
-        global SEQUENCE
-        requestURL = f"{self.url}{self.sessid}Request&Type=Status&SubType=GXT_INPUTS_TBL&StartId={self.recID}&EndId={self.recID}&Sequence={SEQUENCE}"
-        response = urllib.request.urlopen(requestURL).read().decode('utf-8')
-        SEQUENCE += 1
-        lst = [int(x) for x in response.split('=')[1].split(',')]
-        lst[0] = codeMaps.inputStatus1.get(lst[0], lst[0])
-        lst[1] = codeMaps.inputStatus2.get(lst[1], lst[1])
-        return lst
+        super().__init__(name, recID, sessid)
+        self.statusKey = "Input" + str(self.recID)
 
 # class for output objects (inherits from wxIO)
 class Output(WxIO):
     def __init__(self, name, recID, sessid):
-            super().__init__(name, recID, sessid)
-    def status(self):
-        global SEQUENCE
-        requestURL = f"{self.url}{self.sessid}Request&Type=Status&SubType=GXT_PGMS_TBL&StartId={self.recID}&EndId={self.recID}&Sequence={SEQUENCE}"
-        response = urllib.request.urlopen(requestURL).read().decode('utf-8')
-        SEQUENCE += 1
-        lst = [int(x) for x in response.split('=')[1].split(',')]
-        #lst[0] = codeMaps.alarmStatus1.get(lst[0], lst[0])
-        #lst[1] = codeMaps.alarmStatus2.get(lst[1], lst[1])
-        #lst[2] = codeMaps.alarmStatus3.get(lst[2], lst[2])
-        return lst
+        super().__init__(name, recID, sessid)
+        self.statusKey = "PGM" + str(self.recID)
 
 # class for trouble input objects (inherits from wxIO)
 class TroubleInput(WxIO):
     def __init__(self, name, recID, sessid):
-            super().__init__(name, recID, sessid)
-    def status(self):
-        global SEQUENCE
-        requestURL = f"{self.url}{self.sessid}Request&Type=Status&SubType=GXT_TROUBLEINPUTS_TBL&StartId={self.recID}&EndId={self.recID}&Sequence={SEQUENCE}"
-        response = urllib.request.urlopen(requestURL).read().decode('utf-8')
-        SEQUENCE += 1
-        lst = [int(x) for x in response.split('=')[1].split(',')]
-        #lst[0] = codeMaps.alarmStatus1.get(lst[0], lst[0])
-        #lst[1] = codeMaps.alarmStatus2.get(lst[1], lst[1])
-        #lst[2] = codeMaps.alarmStatus3.get(lst[2], lst[2])
-        return lst
+        super().__init__(name, recID, sessid)
+        self.statusKey = "TroubleInput" + str(self.recID)
 
-
+## FUNCTIONS ##
 # generate a random 32 character string
 def generateSessionID():
     sessid = ""
@@ -185,7 +140,24 @@ def convertToDict(inputString):
         dictionary[int(key)] = value
     return dictionary
 
-def buildObjectList(ioList, name, sessid):
+# build a dictionary of status codes for areas, doors, inputs, outputs, and trouble inputs
+def buildStatusDict(url, sessid):
+    global STATUS_DICT
+    areaStatusList = runQuery(url, sessid, params.getStatus, params.areas)
+    doorStatusList = runQuery(url, sessid, params.getStatus, params.doors)
+    inputStatusList = runQuery(url, sessid, params.getStatus, params.inputs)
+    outputStatusList = runQuery(url, sessid, params.getStatus, params.outputs)
+    troubleInputStatusList = runQuery(url, sessid, params.getStatus, params.troubleInputs)
+    for i, lst in enumerate([areaStatusList, doorStatusList, inputStatusList, outputStatusList, troubleInputStatusList]):
+        tempDict = {}
+        statusList = lst.split('&')
+        for status in statusList:
+            name, values = status.split('=')
+            tempDict[name] = list(map(int, values.split(',')))
+        STATUS_DICT.update(tempDict)
+
+# build a dictionary of objects from a dictionary of key-value pairs
+def buildObjectDict(ioList, name, sessid):
     switch = {
         "Area": [],
         "Door": [],
@@ -210,8 +182,7 @@ def buildObjectList(ioList, name, sessid):
         objectList.append(value)
     return objectList
 
-
-#* main function
+# main function
 def main():
     url = f"https://{secrets.domain}/PRT_CTRL_DIN_ISAPI.dll?"
 
@@ -225,35 +196,40 @@ def main():
     outputList = runQuery(url, sessionID, params.getList, params.outputs)
     troubleInputList = runQuery(url, sessionID, params.getList, params.troubleInputs)
 
+    # build status list
+    buildStatusDict(url, sessionID)
+
     # build objects from lists
-    areas = buildObjectList(areaList, "Area", sessionID)
-    doors = buildObjectList(doorList, "Door", sessionID)
-    inputs = buildObjectList(inputList, "Input", sessionID)
-    outputs = buildObjectList(outputList, "Output", sessionID)
-    troubleInputs = buildObjectList(troubleInputList, "TroubleInput", sessionID)
+    areas = buildObjectDict(areaList, "Area", sessionID)
+    doors = buildObjectDict(doorList, "Door", sessionID)
+    inputs = buildObjectDict(inputList, "Input", sessionID)
+    outputs = buildObjectDict(outputList, "Output", sessionID)
+    troubleInputs = buildObjectDict(troubleInputList, "TroubleInput", sessionID)
 
     #* TESTING AREA
+    print("\nSTATUS DICTIONARY: ")
+    print(STATUS_DICT)
     print("\nArea Statuses: ") #TODO remove this line when done testing
-    for i in areas: #TODO remove this line when done testing
-        print(f"{i.name}: {i.status()}") #TODO remove this line when done testing
+    for i in areas:
+        print(f"{i.name}: {i.statusKey} - {i.status()}")
     print("\nDoor Statuses: ") #TODO remove this line when done testing
-    for i in doors: #TODO remove this line when done testing
-        print(f"{i.name}: {i.status()}") #TODO remove this line when done testing
+    for i in doors:
+        print(f"{i.name}: {i.statusKey} - {i.status()}")
     print("\nInput Statuses: ") #TODO remove this line when done testing
-    for i in inputs: #TODO remove this line when done testing
-        print(f"{i.name}: {i.status()}") #TODO remove this line when done testing
+    for i in inputs:
+        print(f"{i.name}: {i.statusKey} - {i.status()}")
     print("\nOutput Statuses: ") #TODO remove this line when done testing
-    for i in outputs: #TODO remove this line when done testing
-        print(f"{i.name}: {i.status()}") #TODO remove this line when done testing
+    for i in outputs:
+        print(f"{i.name}: {i.statusKey} - {i.status()}")
     print("\nTrouble Input Statuses: ") #TODO remove this line when done testing
-    for i in troubleInputs: #TODO remove this line when done testing
-        print(f"{i.name}: {i.status()}") #TODO remove this line when done testing
+    for i in troubleInputs:
+        print(f"{i.name}: {i.statusKey} - {i.status()}")
 
     ## OPEN DOOR
     #runQuery(url, sessionID, params.control, params.doors, doors[3].recID, 1) #TODO remove this line when done testing
     ## OPEN DOOOR
 
-    print("\nUsername: " + secrets.username) #TODO remove this line when done testing
+    #print("\nUsername: " + secrets.username) #TODO remove this line when done testing
     #print("Password: " + secrets.password) #TODO remove this line when done testing
     print("SessionID: " + sessionID) #TODO remove this line when done testing
     #* END TESTING AREA
