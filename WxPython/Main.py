@@ -1,9 +1,10 @@
 from hashlib import sha1  # for hashing the password
 import random  # for generating a random session ID
-import urllib.request  # for making HTTP requests
+import urllib.request # for making HTTP requests
 
 import Includes.Params as params
 import Includes.Secrets as secrets
+import Includes.StatusCodeMaps as codeMaps
 
 # global variables
 SEQUENCE = 0
@@ -16,35 +17,85 @@ class User:
 
 # class for input/output objects (areas, doors, inputs, outputs, and trouble inputs)
 class WxIO:
-    def __init__(self, name, recID, statusKey):
+    def __init__(self, name, recID, sessid):
         self.name = name
         self.recID = recID
-        self.statusKey = statusKey
+        self.sessid = sessid
+        self.url = f"https://{secrets.domain}/PRT_CTRL_DIN_ISAPI.dll?"
 
 # class for area objects (inherits from wxIO)
 class Area(WxIO):
-    def __init__(self, name, recID, statusKey):
-            super().__init__(name, recID, statusKey)
+    def __init__(self, name, recID, sessid):
+            super().__init__(name, recID, sessid)
+
+    def status(self):
+        global SEQUENCE
+        requestURL = f"{self.url}{self.sessid}Request&Type=Status&SubType=GXT_AREAS_TBL&StartId={self.recID}&EndId={self.recID}&Sequence={SEQUENCE}"
+        response = urllib.request.urlopen(requestURL).read().decode('utf-8')
+        SEQUENCE += 1
+        lst = [int(x) for x in response.split('=')[1].split(',')]
+        lst[0] = codeMaps.alarmStatus1.get(lst[0], lst[0])
+        lst[1] = codeMaps.alarmStatus2.get(lst[1], lst[1])
+        lst[2] = codeMaps.alarmStatus3.get(lst[2], lst[2])
+        return lst
 
 # class for door objects (inherits from wxIO)
 class Door(WxIO):
-    def __init__(self, name, recID, statusKey):
-        super().__init__(name, recID, statusKey)
+    def __init__(self, name, recID, sessid):
+        super().__init__(name, recID, sessid)
+    def status(self):
+        global SEQUENCE
+        requestURL = f"{self.url}{self.sessid}Request&Type=Status&SubType=GXT_DOORS_TBL&StartId={self.recID}&EndId={self.recID}&Sequence={SEQUENCE}"
+        response = urllib.request.urlopen(requestURL).read().decode('utf-8')
+        SEQUENCE += 1
+        lst = [int(x) for x in response.split('=')[1].split(',')]
+        lst[0] = codeMaps.doorStatus1.get(lst[0], lst[0])
+        lst[1] = codeMaps.doorStatus2.get(lst[1], lst[1])
+        return lst
 
 # class for input objects (inherits from wxIO)
 class Input(WxIO):
-    def __init__(self, name, recID, statusKey):
-            super().__init__(name, recID, statusKey)
+    def __init__(self, name, recID, sessid):
+            super().__init__(name, recID, sessid)
+    def status(self):
+        global SEQUENCE
+        requestURL = f"{self.url}{self.sessid}Request&Type=Status&SubType=GXT_INPUTS_TBL&StartId={self.recID}&EndId={self.recID}&Sequence={SEQUENCE}"
+        response = urllib.request.urlopen(requestURL).read().decode('utf-8')
+        SEQUENCE += 1
+        lst = [int(x) for x in response.split('=')[1].split(',')]
+        lst[0] = codeMaps.inputStatus1.get(lst[0], lst[0])
+        lst[1] = codeMaps.inputStatus2.get(lst[1], lst[1])
+        return lst
 
 # class for output objects (inherits from wxIO)
 class Output(WxIO):
-    def __init__(self, name, recID, statusKey):
-            super().__init__(name, recID, statusKey)
+    def __init__(self, name, recID, sessid):
+            super().__init__(name, recID, sessid)
+    def status(self):
+        global SEQUENCE
+        requestURL = f"{self.url}{self.sessid}Request&Type=Status&SubType=GXT_PGMS_TBL&StartId={self.recID}&EndId={self.recID}&Sequence={SEQUENCE}"
+        response = urllib.request.urlopen(requestURL).read().decode('utf-8')
+        SEQUENCE += 1
+        lst = [int(x) for x in response.split('=')[1].split(',')]
+        #lst[0] = codeMaps.alarmStatus1.get(lst[0], lst[0])
+        #lst[1] = codeMaps.alarmStatus2.get(lst[1], lst[1])
+        #lst[2] = codeMaps.alarmStatus3.get(lst[2], lst[2])
+        return lst
 
 # class for trouble input objects (inherits from wxIO)
 class TroubleInput(WxIO):
-    def __init__(self, name, recID, statusKey):
-            super().__init__(name, recID, statusKey)
+    def __init__(self, name, recID, sessid):
+            super().__init__(name, recID, sessid)
+    def status(self):
+        global SEQUENCE
+        requestURL = f"{self.url}{self.sessid}Request&Type=Status&SubType=GXT_TROUBLEINPUTS_TBL&StartId={self.recID}&EndId={self.recID}&Sequence={SEQUENCE}"
+        response = urllib.request.urlopen(requestURL).read().decode('utf-8')
+        SEQUENCE += 1
+        lst = [int(x) for x in response.split('=')[1].split(',')]
+        #lst[0] = codeMaps.alarmStatus1.get(lst[0], lst[0])
+        #lst[1] = codeMaps.alarmStatus2.get(lst[1], lst[1])
+        #lst[2] = codeMaps.alarmStatus3.get(lst[2], lst[2])
+        return lst
 
 
 # generate a random 32 character string
@@ -120,10 +171,6 @@ def runQuery(url, sessid, queryType, subType, recID = None, command = None, data
 
     # TODO handle exceptions for invalid queries
 
-    #* TESTING AREA
-    print(f"Query: {url_params}") #TODO remove this line when done testing
-    #* END TESTING AREA
-
     if queryType == params.getList:
         return convertToDict(response)
 
@@ -138,16 +185,7 @@ def convertToDict(inputString):
         dictionary[int(key)] = value
     return dictionary
 
-# get the key to find the status of an object
-def getStatusKey(dictionary, item, dictName):
-    statusKey = ""
-    for key, value in dictionary.items():
-        if value == item:
-            statusKey = dictName + str(key)
-            break
-    return statusKey
-
-def buildObjectList(ioList, name):
+def buildObjectList(ioList, name, sessid):
     switch = {
         "Area": [],
         "Door": [],
@@ -157,17 +195,16 @@ def buildObjectList(ioList, name):
     }
     objectList = switch.get(name, [])
     for key, value in ioList.items():
-        statusKey = getStatusKey(ioList, value, name)
         if name == "Area":
-            value = Area(value, key, statusKey)
+            value = Area(value, key, sessid)
         elif name == "Door":
-            value = Door(value, key, statusKey)
+            value = Door(value, key, sessid)
         elif name == "Input":
-            value = Input(value, key, statusKey)
+            value = Input(value, key, sessid)
         elif name == "Output":
-            value = Output(value, key, statusKey)
+            value = Output(value, key, sessid)
         elif name == "TroubleInput":
-            value = TroubleInput(value, key, statusKey)
+            value = TroubleInput(value, key, sessid)
         else:
             raise ValueError("Invalid object type")
         objectList.append(value)
@@ -189,36 +226,37 @@ def main():
     troubleInputList = runQuery(url, sessionID, params.getList, params.troubleInputs)
 
     # build objects from lists
-    areas = buildObjectList(areaList, "Area")
-    doors = buildObjectList(doorList, "Door")
-    inputs = buildObjectList(inputList, "Input")
-    outputs = buildObjectList(outputList, "Output")
-    troubleInputs = buildObjectList(troubleInputList, "TroubleInput")
+    areas = buildObjectList(areaList, "Area", sessionID)
+    doors = buildObjectList(doorList, "Door", sessionID)
+    inputs = buildObjectList(inputList, "Input", sessionID)
+    outputs = buildObjectList(outputList, "Output", sessionID)
+    troubleInputs = buildObjectList(troubleInputList, "TroubleInput", sessionID)
 
     #* TESTING AREA
-    print("\nAreas: ") #TODO remove this line when done testing
-    for item in areas: #TODO remove this line when done testing
-        print(f"{item.recID}. {item.name}, {item.statusKey}") #TODO remove this line when done testing
-    print("\nDoors: ") #TODO remove this line when done testing
-    for item in doors: #TODO remove this line when done testing
-        print(f"{item.recID}. {item.name}, {item.statusKey}") #TODO remove this line when done testing
-    print("\nInputs: ") #TODO remove this line when done testing
-    for item in inputs: #TODO remove this line when done testing
-        print(f"{item.recID}. {item.name}, {item.statusKey}") #TODO remove this line when done testing
-    print("\nOutputs: ") #TODO remove this line when done testing
-    for item in outputs: #TODO remove this line when done testing
-        print(f"{item.recID}. {item.name}, {item.statusKey}") #TODO remove this line when done testing
-    print("\nTrouble Inputs: ") #TODO remove this line when done testing
-    for item in troubleInputs: #TODO remove this line when done testing
-        print(f"{item.recID}. {item.name}, {item.statusKey}") #TODO remove this line when done testing
+    print("\nArea Statuses: ") #TODO remove this line when done testing
+    for i in areas: #TODO remove this line when done testing
+        print(f"{i.name}: {i.status()}") #TODO remove this line when done testing
+    print("\nDoor Statuses: ") #TODO remove this line when done testing
+    for i in doors: #TODO remove this line when done testing
+        print(f"{i.name}: {i.status()}") #TODO remove this line when done testing
+    print("\nInput Statuses: ") #TODO remove this line when done testing
+    for i in inputs: #TODO remove this line when done testing
+        print(f"{i.name}: {i.status()}") #TODO remove this line when done testing
+    print("\nOutput Statuses: ") #TODO remove this line when done testing
+    for i in outputs: #TODO remove this line when done testing
+        print(f"{i.name}: {i.status()}") #TODO remove this line when done testing
+    print("\nTrouble Input Statuses: ") #TODO remove this line when done testing
+    for i in troubleInputs: #TODO remove this line when done testing
+        print(f"{i.name}: {i.status()}") #TODO remove this line when done testing
+
+    ## OPEN DOOR
+    #runQuery(url, sessionID, params.control, params.doors, doors[3].recID, 1) #TODO remove this line when done testing
+    ## OPEN DOOOR
+
     print("\nUsername: " + secrets.username) #TODO remove this line when done testing
     #print("Password: " + secrets.password) #TODO remove this line when done testing
     print("SessionID: " + sessionID) #TODO remove this line when done testing
     #* END TESTING AREA
-
-    ## OPEN DOOR
-    #runQuery(url, sessionID, params.control, params.doors, doors[3].recID, 1)
-    ## OPEN DOOOR
 
 
 if __name__ == '__main__':

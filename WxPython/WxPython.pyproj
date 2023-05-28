@@ -25,6 +25,7 @@
   <ItemGroup>
     <Compile Include="Includes\Params.py" />
     <Compile Include="Includes\Secrets.py" />
+    <Compile Include="Includes\StatusCodeMaps.py" />
     <Compile Include="Main.py" />
   </ItemGroup>
   <ItemGroup>
