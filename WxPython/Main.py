@@ -27,30 +27,60 @@ class Area(WxIO):
     def __init__(self, name, recID, sessid):
         super().__init__(name, recID, sessid)
         self.statusKey = "Area" + str(self.recID)
+    def printStatus(self):
+        lst = self.status()[:]
+        lst[0] = codeMaps.areaStatus1.get(lst[0], lst[0])
+        lst[1] = codeMaps.areaStatus2.get(lst[1], lst[1])
+        binary_str = bin(lst[2])[2:].rjust(7, '0')
+        lst[2] = [codeMaps.areaStatus3.get(i, i) for i in range(len(binary_str)) if binary_str[i] == '1']
+        print(f"{self.name}: {self.statusKey}{self.status()} - {lst}")
 
 # class for door objects (inherits from wxIO)
 class Door(WxIO):
     def __init__(self, name, recID, sessid):
         super().__init__(name, recID, sessid)
         self.statusKey = "Door" + str(self.recID)
+    def printStatus(self):
+        lst = self.status()[:]
+        lst[0] = codeMaps.doorStatus1.get(lst[0], lst[0])
+        lst[1] = codeMaps.doorStatus2.get(lst[1], lst[1])
+        print(f"{self.name}: {self.statusKey}{self.status()} - {lst}")
+    def unlock(self):
+        runQuery(self.url, self.sessid, params.control, params.doors, self.recID, 1)
 
 # class for input objects (inherits from wxIO)
 class Input(WxIO):
     def __init__(self, name, recID, sessid):
         super().__init__(name, recID, sessid)
         self.statusKey = "Input" + str(self.recID)
+    def printStatus(self):
+        lst = self.status()[:]
+        lst[0] = codeMaps.inputStatus1.get(lst[0], lst[0])
+        binary_str = bin(lst[1])[2:].rjust(3, '0')
+        lst[1] = [codeMaps.inputStatus2.get(i, i) for i in range(len(binary_str)) if binary_str[i] == '1']
+        print(f"{self.name}: {self.statusKey}{self.status()} - {lst}")
 
 # class for output objects (inherits from wxIO)
 class Output(WxIO):
     def __init__(self, name, recID, sessid):
         super().__init__(name, recID, sessid)
         self.statusKey = "PGM" + str(self.recID)
+    def printStatus(self):
+        lst = self.status()[:]
+        lst[0] = codeMaps.outputStatus1.get(lst[0], lst[0])
+        print(f"{self.name}: {self.statusKey}{self.status()} - {lst}")
 
 # class for trouble input objects (inherits from wxIO)
 class TroubleInput(WxIO):
     def __init__(self, name, recID, sessid):
         super().__init__(name, recID, sessid)
         self.statusKey = "TroubleInput" + str(self.recID)
+    def printStatus(self):
+        lst = self.status()[:]
+        lst[0] = codeMaps.troubleInputStatus1.get(lst[0], lst[0])
+        binary_str = bin(lst[1])[2:].rjust(3, '0')
+        lst[1] = [codeMaps.troubleInputStatus2.get(i, i) for i in range(len(binary_str)) if binary_str[i] == '1']
+        print(f"{self.name}: {self.statusKey}{self.status()} - {lst}")
 
 ## FUNCTIONS ##
 # generate a random 32 character string
@@ -141,7 +171,7 @@ def convertToDict(inputString):
     return dictionary
 
 # build a dictionary of status codes for areas, doors, inputs, outputs, and trouble inputs
-def buildStatusDict(url, sessid):
+def updateStatusDict(url, sessid):
     global STATUS_DICT
     areaStatusList = runQuery(url, sessid, params.getStatus, params.areas)
     doorStatusList = runQuery(url, sessid, params.getStatus, params.doors)
@@ -153,11 +183,14 @@ def buildStatusDict(url, sessid):
         statusList = lst.split('&')
         for status in statusList:
             name, values = status.split('=')
-            tempDict[name] = list(map(int, values.split(',')))
+            if name in STATUS_DICT:
+                STATUS_DICT[name] = list(map(int, values.split(',')))
+            else:
+                tempDict[name] = list(map(int, values.split(',')))
         STATUS_DICT.update(tempDict)
 
 # build a dictionary of objects from a dictionary of key-value pairs
-def buildObjectDict(ioList, name, sessid):
+def buildObjectList(ioList, name, sessid):
     switch = {
         "Area": [],
         "Door": [],
@@ -186,50 +219,40 @@ def buildObjectDict(ioList, name, sessid):
 def main():
     url = f"https://{secrets.domain}/PRT_CTRL_DIN_ISAPI.dll?"
 
-    # initiate session and get lists
+    # initiate session and build status dictionary
     sessionID = login(url)
-    userList = runQuery(url, sessionID, params.getList, params.users)
-    accessLevelList = runQuery(url, sessionID, params.getList, params.accessLevels)
-    areaList = runQuery(url, sessionID, params.getList, params.areas)
-    doorList = runQuery(url, sessionID, params.getList, params.doors)
-    inputList = runQuery(url, sessionID, params.getList, params.inputs)
-    outputList = runQuery(url, sessionID, params.getList, params.outputs)
-    troubleInputList = runQuery(url, sessionID, params.getList, params.troubleInputs)
+    updateStatusDict(url, sessionID)
 
-    # build status list
-    buildStatusDict(url, sessionID)
-
-    # build objects from lists
-    areas = buildObjectDict(areaList, "Area", sessionID)
-    doors = buildObjectDict(doorList, "Door", sessionID)
-    inputs = buildObjectDict(inputList, "Input", sessionID)
-    outputs = buildObjectDict(outputList, "Output", sessionID)
-    troubleInputs = buildObjectDict(troubleInputList, "TroubleInput", sessionID)
+    # build objects
+    areas = buildObjectList(runQuery(url, sessionID, params.getList, params.areas), "Area", sessionID)
+    doors = buildObjectList(runQuery(url, sessionID, params.getList, params.doors), "Door", sessionID)
+    inputs = buildObjectList(runQuery(url, sessionID, params.getList, params.inputs), "Input", sessionID)
+    outputs = buildObjectList(runQuery(url, sessionID, params.getList, params.outputs), "Output", sessionID)
+    troubleInputs = buildObjectList(runQuery(url, sessionID, params.getList, params.troubleInputs), "TroubleInput", sessionID)
 
     #* TESTING AREA
-    print("\nSTATUS DICTIONARY: ")
-    print(STATUS_DICT)
     print("\nArea Statuses: ") #TODO remove this line when done testing
-    for i in areas:
-        print(f"{i.name}: {i.statusKey} - {i.status()}")
+    for i in areas: #TODO remove this line when done testing
+        i.printStatus() #TODO remove this line when done testing
     print("\nDoor Statuses: ") #TODO remove this line when done testing
-    for i in doors:
-        print(f"{i.name}: {i.statusKey} - {i.status()}")
+    for i in doors: #TODO remove this line when done testing
+        i.printStatus() #TODO remove this line when done testing
     print("\nInput Statuses: ") #TODO remove this line when done testing
-    for i in inputs:
-        print(f"{i.name}: {i.statusKey} - {i.status()}")
+    for i in inputs: #TODO remove this line when done testing
+        i.printStatus() #TODO remove this line when done testing
     print("\nOutput Statuses: ") #TODO remove this line when done testing
-    for i in outputs:
-        print(f"{i.name}: {i.statusKey} - {i.status()}")
+    for i in outputs: #TODO remove this line when done testing
+        i.printStatus() #TODO remove this line when done testing
     print("\nTrouble Input Statuses: ") #TODO remove this line when done testing
-    for i in troubleInputs:
-        print(f"{i.name}: {i.statusKey} - {i.status()}")
+    for i in troubleInputs: #TODO remove this line when done testing
+        i.printStatus() #TODO remove this line when done testing
 
     ## OPEN DOOR
-    #runQuery(url, sessionID, params.control, params.doors, doors[3].recID, 1) #TODO remove this line when done testing
+    #doors[3].unlock() #TODO remove this line when done testing
     ## OPEN DOOOR
 
-    #print("\nUsername: " + secrets.username) #TODO remove this line when done testing
+    print("\n") #TODO remove this line when done testing
+    #print("Username: " + secrets.username) #TODO remove this line when done testing
     #print("Password: " + secrets.password) #TODO remove this line when done testing
     print("SessionID: " + sessionID) #TODO remove this line when done testing
     #* END TESTING AREA

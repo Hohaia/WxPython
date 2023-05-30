@@ -1,13 +1,13 @@
 
 ## Area Status Code Maps
-# Status 1 (Area 24hr Status)
-alarmStatus1 = {
+# Status 1 (24hr Status)
+areaStatus1 = {
     0: "24hr Disabled",
     1: "24hr Busy",
     128: "24hr Enabled"
-}
+    }
 # Status 2 (Area Status)
-alarmStatus2 = {
+areaStatus2 = {
     0: "Disarmed", 
     1: "Zone(s) Open Waiting for User",
     2: "Trouble Condition Waiting for User", 
@@ -21,17 +21,17 @@ alarmStatus2 = {
     130: "Entry Delay",
     131: "Disarm Delay",
     132: "Code Delay"
-}
+    }
 # Status 3 (Area Notification Bits)
-alarmStatus3 = {
-    0: "Alarm Activated",
-    1: "Siren ACtivated",
-    2: "Alarms In Memory",
+areaStatus3 = {
+    6: "Alarm Activated",
+    5: "Siren ACtivated",
+    4: "Alarms In Memory",
     3: "Remote Armed",
-    4: "Force Armed",
-    5: "Instant Armed",
-    6: "Partial Armed"
-}
+    2: "Force Armed",
+    1: "Instant Armed",
+    0: "Partial Armed"
+    }
 
 ## Door Status Code Maps
 # Status 1 (Door Lock Status)
@@ -54,14 +54,14 @@ doorStatus1 = {
     16: "Unlocked By Entry Device Using Extended Door Time",
     17: "Unlocked By Operator Using Extended Door Time",
     18: "Locked Using Extended Door Time",
-    19: "Locked down (Entry allowed)",
-    20: "Locked down (Exit allowed)",
-    21: "Locked down (Entry/ Exit allowed)",
-    22: "Locked down (full lockdown)",
-    23: "Not Locked (in the locked state but not secure)",
-    24: "Not Locked conditional (in the locked state but not secure, with a calendar action active)"
-}
-# Status 2 (Door Position Status)
+    19: "Locked Down (Entry allowed)",
+    20: "Locked Down (Exit allowed)",
+    21: "Locked Down (Entry/ Exit allowed)",
+    22: "Locked Down (full lockdown)",
+    23: "Not Locked",
+    24: "Not Locked Conditional"
+    }
+# Status 2 (Door Position)
 doorStatus2 = {
     0: "Closed",
     1: "Open",
@@ -69,25 +69,43 @@ doorStatus2 = {
     3: "Left Open",
     4: "Forced Open",
     5: "Bonding Fault"
-}
+    }
 
 ## Input Status Code Maps
-# Status 1 (Input Status)
+# Status 1 (Input State)
 inputStatus1 = {
     0: "Closed / Off",
     1: "Open / On",
     2: "Tamper",
     3: "Short Circuit"
-}
-# Status 2 (Input Flags)
+    }
+# Status 2 (Input Flag Bits)
 inputStatus2 = {
-    0: "Input Bypassed",
+    2: "Input Bypassed",
     1: "Input Bypassed (Latched)",
-    2: "Siren Lockout"
-}
-#inputStatus2 = {
-#    0: "",
-#    1: "Input Bypassed",
-#    2: "Siren Lockout",
-#    3: "Input Bypassed (Latched)"
-#}
+    0: "Siren Lockout"
+    }
+
+## Output Status Code Maps
+# Status 1 (Output State)
+outputStatus1 = {
+    0: "Off",
+    1: "On",
+    2: "Pulse On",
+    3: "On Timed",
+    4: "Pulse On Timed",
+    5: "Off By Conditional Exception",
+    6: "On By Conditional Exception"
+    }
+
+## Trouble Input Status Code Maps
+# Status 1 (Trouble Input State)
+troubleInputStatus1 = {
+    0: "Closed / Off",
+    1: "Open / On"
+    }
+# Status 2 (Trouble Input Flags)
+troubleInputStatus2 = {
+    1: "Input Bypassed",
+    0: "Input Bypassed (Latched)"
+    }
