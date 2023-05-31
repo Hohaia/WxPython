@@ -172,6 +172,8 @@ def login(url):
     hashXorPswdHash = sha1(xorPswdHash.encode('utf-8')).hexdigest().upper()
     loginParams = f"{params.login}&Name={hashXorUsername}&Password={hashXorPswdHash}" # build the login parameters
     data = runLoginQuery(url, loginParams, sessid) # login to session
+    if data.startswith("FAIL"):
+        raise ValueError(f"Login failed with error code {data}")
     SEQUENCE = 0 # reset sequence number
     return sessid
 
