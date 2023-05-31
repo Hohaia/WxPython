@@ -11,18 +11,17 @@ SEQUENCE = 0
 STATUS_DICT = {}
 
 ## CLASSES ##
-# class for input/output objects (areas, doors, inputs, outputs, and trouble inputs)
+# parent class for input/output objects (areas, doors, inputs, outputs, and trouble inputs) 
 class WxIO:
     def __init__(self, name, recID, sessid):
         self.name = name
         self.recID = recID
-        self.statusKey = None
         self.sessid = sessid
         self.url = f"https://{secrets.domain}/PRT_CTRL_DIN_ISAPI.dll?"
     def status(self):
         return STATUS_DICT[self.statusKey]
 
-# class for area objects (inherits from wxIO)
+# subclass for area objects (inherits from wxIO)
 class Area(WxIO):
     def __init__(self, name, recID, sessid):
         super().__init__(name, recID, sessid)
@@ -34,8 +33,32 @@ class Area(WxIO):
         binary_str = bin(lst[2])[2:].rjust(7, '0')
         lst[2] = [codeMaps.areaStatus3.get(i, i) for i in range(len(binary_str)) if binary_str[i] == '1']
         print(f"{self.name}: {self.statusKey}{self.status()} - {lst}")
+    def disarm(self):
+        runQuery(self.url, self.sessid, params.control, params.areas, self.recID, 0)
+    def disarm24(self):
+        runQuery(self.url, self.sessid, params.control, params.areas, self.recID, 1)
+    def disarmAll(self):
+        runQuery(self.url, self.sessid, params.control, params.areas, self.recID, 2)
+    def arm(self):
+        runQuery(self.url, self.sessid, params.control, params.areas, self.recID, 3)
+    def armForce(self):
+        runQuery(self.url, self.sessid, params.control, params.areas, self.recID, 4)
+    def armInstant(self):
+        runQuery(self.url, self.sessid, params.control, params.areas, self.recID, 5)
+    def armForceInstant(self):
+        runQuery(self.url, self.sessid, params.control, params.areas, self.recID, 6)
+    def walkTest_On(self):
+        runQuery(self.url, self.sessid, params.control, params.areas, self.recID, 7)
+    def walkTest_Off(self):
+        runQuery(self.url, self.sessid, params.control, params.areas, self.recID, 8)
+    def silenceAlarm(self):
+        runQuery(self.url, self.sessid, params.control, params.areas, self.recID, 9)
+    def armStay(self):
+        runQuery(self.url, self.sessid, params.control, params.areas, self.recID, 10)
+    def arm24(self):
+        runQuery(self.url, self.sessid, params.control, params.areas, self.recID, 11)
 
-# class for door objects (inherits from wxIO)
+# subclass for door objects (inherits from wxIO)
 class Door(WxIO):
     def __init__(self, name, recID, sessid):
         super().__init__(name, recID, sessid)
@@ -45,10 +68,28 @@ class Door(WxIO):
         lst[0] = codeMaps.doorStatus1.get(lst[0], lst[0])
         lst[1] = codeMaps.doorStatus2.get(lst[1], lst[1])
         print(f"{self.name}: {self.statusKey}{self.status()} - {lst}")
+    def lock(self):
+        runQuery(self.url, self.sessid, params.control, params.doors, self.recID, 0)
     def unlock(self):
         runQuery(self.url, self.sessid, params.control, params.doors, self.recID, 1)
+    def unlockLatched(self):
+        runQuery(self.url, self.sessid, params.control, params.doors, self.recID, 2)
+    def lockDown_EntryAllowed(self):
+        runQuery(self.url, self.sessid, params.control, params.doors, self.recID, 3)
+    def lockDown_ExitAllowed(self):
+        runQuery(self.url, self.sessid, params.control, params.doors, self.recID, 4)
+    def lockDown_EntryExitAllowed(self):
+        runQuery(self.url, self.sessid, params.control, params.doors, self.recID, 5)
+    def lockDown_Clear(self):
+        runQuery(self.url, self.sessid, params.control, params.doors, self.recID, 6)
+    def cancelConditionalException(self):
+        runQuery(self.url, self.sessid, params.control, params.doors, self.recID, 7)
+    def restoreConditionalException(self):
+        runQuery(self.url, self.sessid, params.control, params.doors, self.recID, 8)
+    def lockDown_Full(self):
+        runQuery(self.url, self.sessid, params.control, params.doors, self.recID, 9)
 
-# class for input objects (inherits from wxIO)
+# subclass for input objects (inherits from wxIO)
 class Input(WxIO):
     def __init__(self, name, recID, sessid):
         super().__init__(name, recID, sessid)
@@ -59,8 +100,14 @@ class Input(WxIO):
         binary_str = bin(lst[1])[2:].rjust(3, '0')
         lst[1] = [codeMaps.inputStatus2.get(i, i) for i in range(len(binary_str)) if binary_str[i] == '1']
         print(f"{self.name}: {self.statusKey}{self.status()} - {lst}")
+    def removeBypass(self):
+        runQuery(self.url, self.sessid, params.control, params.inputs, self.recID, 0)
+    def bypassTillDisarm(self):
+        runQuery(self.url, self.sessid, params.control, params.inputs, self.recID, 1)
+    def bypass(self):
+        runQuery(self.url, self.sessid, params.control, params.inputs, self.recID, 2)
 
-# class for output objects (inherits from wxIO)
+# subclass for output objects (inherits from wxIO)
 class Output(WxIO):
     def __init__(self, name, recID, sessid):
         super().__init__(name, recID, sessid)
@@ -70,7 +117,7 @@ class Output(WxIO):
         lst[0] = codeMaps.outputStatus1.get(lst[0], lst[0])
         print(f"{self.name}: {self.statusKey}{self.status()} - {lst}")
 
-# class for trouble input objects (inherits from wxIO)
+# subclass for trouble input objects (inherits from wxIO)
 class TroubleInput(WxIO):
     def __init__(self, name, recID, sessid):
         super().__init__(name, recID, sessid)
@@ -78,7 +125,7 @@ class TroubleInput(WxIO):
     def printStatus(self):
         lst = self.status()[:]
         lst[0] = codeMaps.troubleInputStatus1.get(lst[0], lst[0])
-        binary_str = bin(lst[1])[2:].rjust(3, '0')
+        binary_str = bin(lst[1])[2:].rjust(2, '0')
         lst[1] = [codeMaps.troubleInputStatus2.get(i, i) for i in range(len(binary_str)) if binary_str[i] == '1']
         print(f"{self.name}: {self.statusKey}{self.status()} - {lst}")
 
@@ -96,7 +143,6 @@ def runLoginQuery(url, queryParams, sessid):
     queryParams += f"&SessionID={sessid}"
     url_params = url + queryParams
     response = urllib.request.urlopen(url_params).read().decode('utf-8')
-
     return response
 
 # xor a string with a number
@@ -104,7 +150,6 @@ def xorFn(pswd: str, num: int):
     numbin = format(num, '032b') # convert number to binary string
     startpos = len(numbin) # start at end of the string (right hand side)
     retval = ""
-
     for i in range(len(pswd)):
         charcode = ord(pswd[i])  # take character at position i
         startpos = len(numbin) - 8 if startpos == 0 else startpos - 8  # grab 8 bits (if at lhs of string, start again at rhs)
@@ -113,7 +158,6 @@ def xorFn(pswd: str, num: int):
         if len(hexcode) == 1:
             hexcode = "0" + hexcode # add leading zero if necessary
         retval += hexcode
-
     return retval.upper()
 
 # login to the WX API and initiate a session encrypted over HTTPS
@@ -121,24 +165,19 @@ def login(url):
     global SEQUENCE
     sessid = generateSessionID()
     pswdHash = sha1(secrets.password.encode('utf-8')).hexdigest()
-
     data = runLoginQuery(url, params.init, sessid) # initiate session
-
     xorUsername = xorFn(secrets.username, (int(data) +1))
     hashXorUsername = sha1(xorUsername.encode('utf-8')).hexdigest().upper()
     xorPswdHash = xorFn(pswdHash, int(data))
     hashXorPswdHash = sha1(xorPswdHash.encode('utf-8')).hexdigest().upper()
-    
     loginParams = f"{params.login}&Name={hashXorUsername}&Password={hashXorPswdHash}" # build the login parameters
     data = runLoginQuery(url, loginParams, sessid) # login to session
     SEQUENCE = 0 # reset sequence number
-
     return sessid
 
 #*TODO run a query against the API using the given parameters and session ID
 def runQuery(url, sessid, queryType, subType, recID = None, command = None, data1 = None, data2 = None):
     global SEQUENCE
-
     queryParams = f"{sessid}{queryType}{subType}"
     if recID is not None:
         queryParams += f"&RecId={recID}"
@@ -150,21 +189,15 @@ def runQuery(url, sessid, queryType, subType, recID = None, command = None, data
         queryParams += f"&Data2={data2}"
     queryParams += f"&Sequence={SEQUENCE}"
     url_params = url + queryParams
-
     response = urllib.request.urlopen(url_params).read().decode('utf-8')
     SEQUENCE += 1 # increment sequence number
-
-    # TODO handle exceptions for invalid queries
-
     if queryType == params.getList:
         return convertToDict(response)
-
     return response
 
 # convert a string of key-value pairs to a dictionary
 def convertToDict(inputString):
     dictionary = {}
-
     for item in inputString.split("&"):
         key, value = item.split("=")
         dictionary[int(key)] = value
