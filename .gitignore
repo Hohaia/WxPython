@@ -10,10 +10,6 @@
 *.userosscache
 *.sln.docstates
 
-*.sln
-**.pyproj
-WxPython/MyPythonEnvironment/
-
 # User-specific files (MonoDevelop/Xamarin Studio)
 *.userprefs
 
@@ -365,3 +361,8 @@ MigrationBackup/
 
 # Fody - auto-generated XML schema
 FodyWeavers.xsd
+
+# USER DEFINED FILES AND FOLDERS
+*.sln
+**.pyproj
+WxPython/MyPythonEnvironment/
