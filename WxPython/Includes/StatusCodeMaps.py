@@ -1,4 +1,3 @@
-
 ## Area Status Code Maps
 # Status 1 (24hr Status)
 areaStatus1 = {

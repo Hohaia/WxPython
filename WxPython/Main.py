@@ -12,7 +12,7 @@ STATUS_DICT = {}
 
 ## CLASSES ##
 # parent class for input/output objects (areas, doors, inputs, outputs, and trouble inputs) 
-class WxIO:
+class Wx_IO:
     def __init__(self, name, recID, sessid):
         self.name = name
         self.recID = recID
@@ -22,7 +22,7 @@ class WxIO:
         return STATUS_DICT[self.statusKey]
 
 # subclass for area objects (inherits from wxIO)
-class Area(WxIO):
+class Area(Wx_IO):
     def __init__(self, name, recID, sessid):
         super().__init__(name, recID, sessid)
         self.statusKey = "Area" + str(self.recID)
@@ -59,7 +59,7 @@ class Area(WxIO):
         run_Query(self.url, self.sessid, params.control, params.areas, self.recID, 11)
 
 # subclass for door objects (inherits from wxIO)
-class Door(WxIO):
+class Door(Wx_IO):
     def __init__(self, name, recID, sessid):
         super().__init__(name, recID, sessid)
         self.statusKey = "Door" + str(self.recID)
@@ -90,7 +90,7 @@ class Door(WxIO):
         run_Query(self.url, self.sessid, params.control, params.doors, self.recID, 9)
 
 # subclass for input objects (inherits from wxIO)
-class Input(WxIO):
+class Input(Wx_IO):
     def __init__(self, name, recID, sessid):
         super().__init__(name, recID, sessid)
         self.statusKey = "Input" + str(self.recID)
@@ -108,7 +108,7 @@ class Input(WxIO):
         run_Query(self.url, self.sessid, params.control, params.inputs, self.recID, 2)
 
 # subclass for output objects (inherits from wxIO)
-class Output(WxIO):
+class Output(Wx_IO):
     def __init__(self, name, recID, sessid):
         super().__init__(name, recID, sessid)
         self.statusKey = "PGM" + str(self.recID)
@@ -118,7 +118,7 @@ class Output(WxIO):
         print(f"{self.name}: {self.statusKey}{self.status()} - {lst}")
 
 # subclass for trouble input objects (inherits from wxIO)
-class Trouble_Input(WxIO):
+class Trouble_Input(Wx_IO):
     def __init__(self, name, recID, sessid):
         super().__init__(name, recID, sessid)
         self.statusKey = "TroubleInput" + str(self.recID)
@@ -268,19 +268,19 @@ def main():
     #* TESTING AREA
     print("\nArea Statuses: ") #TODO remove this line when done testing
     for i in areas: #TODO remove this line when done testing
-        i.printStatus() #TODO remove this line when done testing
+        i.print_Status() #TODO remove this line when done testing
     print("\nDoor Statuses: ") #TODO remove this line when done testing
     for i in doors: #TODO remove this line when done testing
-        i.printStatus() #TODO remove this line when done testing
+        i.print_Status() #TODO remove this line when done testing
     print("\nInput Statuses: ") #TODO remove this line when done testing
     for i in inputs: #TODO remove this line when done testing
-        i.printStatus() #TODO remove this line when done testing
+        i.print_Status() #TODO remove this line when done testing
     print("\nOutput Statuses: ") #TODO remove this line when done testing
     for i in outputs: #TODO remove this line when done testing
-        i.printStatus() #TODO remove this line when done testing
+        i.print_Status() #TODO remove this line when done testing
     print("\nTrouble Input Statuses: ") #TODO remove this line when done testing
     for i in troubleInputs: #TODO remove this line when done testing
-        i.printStatus() #TODO remove this line when done testing
+        i.print_Status() #TODO remove this line when done testing
 
     ## OPEN DOOR
     #doors[3].unlock() #TODO remove this line when done testing
@@ -289,7 +289,8 @@ def main():
     print("\n") #TODO remove this line when done testing
     #print("Username: " + secrets.username) #TODO remove this line when done testing
     #print("Password: " + secrets.password) #TODO remove this line when done testing
-    print("SessionID: " + sessionID) #TODO remove this line when done testing
+    print(f"SessionID: {sessionID}") #TODO remove this line when done testing
+    print(f"Sequence: {SEQUENCE}") #TODO remove this line when done testing
     #* END TESTING AREA
 
 

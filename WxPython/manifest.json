@@ -1,0 +1,12 @@
+{
+  "domain": "Protege_WX",
+  "name": "Protege WX",
+  "codeowners": [ "@hohaia" ],
+  "dependencies": [],
+  "documentation": "https://github.com/Hohaia/WxPython/",
+  "integration_type": "hub",
+  "iot_class": "local_polling",
+  "issue_tracker": "https://github.com/Hohaia/WxPython/issues",
+  "requirements": [],
+  "version": "0.1.0"
+}
