@@ -365,4 +365,6 @@ FodyWeavers.xsd
 # USER DEFINED FILES AND FOLDERS
 *.sln
 **.pyproj
+WxPython/Includes/Secrets.py
+
 WxPython/MyPythonEnvironment/
