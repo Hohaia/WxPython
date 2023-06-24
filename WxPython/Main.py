@@ -9,6 +9,11 @@ import Includes.StatusCodeMaps as codeMaps
 ## GLOBAL VARIABLES ##
 SEQUENCE = 0
 STATUS_DICT = {}
+AREAS = []
+DOORS = []
+INPUTS = []
+OUTPUTS = []
+TROUBLE_INPUTS = []
 
 ## CLASSES ##
 # parent class for input/output objects (areas, doors, inputs, outputs, and trouble inputs) 
@@ -250,6 +255,15 @@ def build_Object_List(ioList, name, sessid):
         objectList.append(value)
     return objectList
 
+# build Global List of all objects
+def build_Global_Object_Lists(url, sessionID):
+    global AREAS, DOORS, INPUTS, OUTPUTS, TROUBLE_INPUTS
+    AREAS = build_Object_List(run_Query(url, sessionID, params.getList, params.areas), "Area", sessionID)
+    DOORS = build_Object_List(run_Query(url, sessionID, params.getList, params.doors), "Door", sessionID)
+    INPUTS = build_Object_List(run_Query(url, sessionID, params.getList, params.inputs), "Input", sessionID)
+    OUTPUTS = build_Object_List(run_Query(url, sessionID, params.getList, params.outputs), "Output", sessionID)
+    TROUBLE_INPUTS = build_Object_List(run_Query(url, sessionID, params.getList, params.troubleInputs), "TroubleInput", sessionID)
+
 # main function
 def main():
     url = f"https://{secrets.domain}/PRT_CTRL_DIN_ISAPI.dll?"
@@ -259,31 +273,27 @@ def main():
     update_Status_Dict(url, sessionID)
 
     # build objects
-    areas = build_Object_List(run_Query(url, sessionID, params.getList, params.areas), "Area", sessionID)
-    doors = build_Object_List(run_Query(url, sessionID, params.getList, params.doors), "Door", sessionID)
-    inputs = build_Object_List(run_Query(url, sessionID, params.getList, params.inputs), "Input", sessionID)
-    outputs = build_Object_List(run_Query(url, sessionID, params.getList, params.outputs), "Output", sessionID)
-    troubleInputs = build_Object_List(run_Query(url, sessionID, params.getList, params.troubleInputs), "TroubleInput", sessionID)
+    build_Global_Object_Lists(url, sessionID)
 
     #* TESTING AREA
     print("\nArea Statuses: ") #TODO remove this line when done testing
-    for i in areas: #TODO remove this line when done testing
+    for i in AREAS: #TODO remove this line when done testing
         i.print_Status() #TODO remove this line when done testing
     print("\nDoor Statuses: ") #TODO remove this line when done testing
-    for i in doors: #TODO remove this line when done testing
+    for i in DOORS: #TODO remove this line when done testing
         i.print_Status() #TODO remove this line when done testing
     print("\nInput Statuses: ") #TODO remove this line when done testing
-    for i in inputs: #TODO remove this line when done testing
+    for i in INPUTS: #TODO remove this line when done testing
         i.print_Status() #TODO remove this line when done testing
     print("\nOutput Statuses: ") #TODO remove this line when done testing
-    for i in outputs: #TODO remove this line when done testing
+    for i in OUTPUTS: #TODO remove this line when done testing
         i.print_Status() #TODO remove this line when done testing
     print("\nTrouble Input Statuses: ") #TODO remove this line when done testing
-    for i in troubleInputs: #TODO remove this line when done testing
+    for i in TROUBLE_INPUTS: #TODO remove this line when done testing
         i.print_Status() #TODO remove this line when done testing
 
     ## OPEN DOOR
-    #doors[3].unlock() #TODO remove this line when done testing
+    DOORS[3].unlock() #TODO remove this line when done testing
     ## OPEN DOOOR
 
     print("\n") #TODO remove this line when done testing
